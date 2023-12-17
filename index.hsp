@@ -1,0 +1,26 @@
+#include "hsp3cl.as"
+#packopt orgpath 1
+#packopt name "rmminverpe"
+dircmdline=""+dir_cmdline
+repeat:if strmid(dircmdline,0,1)=" "{dircmdline=strmid(dircmdline,1,strlen(dircmdline)-1)}else{break}:loop
+dircmdline_fni=instr(dircmdline,0," ")
+baseaddr4chg=0x10000000
+dircmdline_fn=""+dircmdline
+if dircmdline=""{mes "Usage: rmminverpe [pefile's filename]\nEx:rmminverpe ia32.dll":end -1}
+exist dircmdline_fn
+strsize2=strsize
+if strsize2=-1{mes "File not found":end -1}
+sdim pefile,strsize2
+bload dircmdline_fn,pefile
+peheaderstart=lpeek(pefile,0x3c)
+pesectiontable=peheaderstart+0xf8
+pebaseaddr4noreloc=lpeek(pefile,peheaderstart+0x34)
+pesectiontablechk=pesectiontable
+lpoke pefile,peheaderstart+0x40,0x4
+lpoke pefile,peheaderstart+0x48,0x4
+mes "Removed minimum version info from your pe format file!"
+dircmdline_fn_lastdir=-1
+repeat strlen(dircmdline_fn):if strmid(dircmdline_fn,cnt,1)="\\" or strmid(dircmdline_fn,cnt,1)="/"{dircmdline_fn_lastdir=cnt}:loop
+dircmdline_fn_4save=strmid(dircmdline_fn,0,dircmdline_fn_lastdir+1)+"minverremoved_"+strmid(dircmdline_fn,dircmdline_fn_lastdir+1,strlen(dircmdline_fn))
+bsave dircmdline_fn_4save,pefile
+end 0
